@@ -1,0 +1,299 @@
+using gold.**
+
+toSet(C) :=  {x|  x in C}
+
+///====   mini Parser===
+
+function createParser(A):IPushdownAutomaton begin
+	Q:={0,1,18}∪((2‥51)×((2‥51)∪{"BG","NM","CM","CT"}))
+	Σ:=toSet(A)  ∪ {' ', '\n','R'}
+	Γ:={'1'}
+	q₀:=0
+	F:={18}
+	M:=GPushdownAutomaton(Q,Σ,Γ,q₀,F)
+SkipChars := {' ', '\n'}   // this will only  be used when testing only the parser as the lexer removes  SkipChars
+	
+	//***********INICIO DE LOS COMANDOS	
+	M.delta(0,18,'V').ignore()
+	M.delta(18,⟨18,"BG"⟩,'X').ignore()
+	
+	//Comandos Básicos
+	
+	//assignTo: n, name;
+	M.delta(⟨18,"BG"⟩,⟨2,2⟩,'a').ignore()
+	M.delta(⟨16,"CM"⟩,⟨2,2⟩,'a').ignore()
+	M.delta(⟨2,2⟩,⟨2,34⟩,':').ignore()
+	M.delta(⟨2,34⟩,⟨2,31⟩,'#').ignore()
+	M.delta(⟨2,31⟩,⟨2,35⟩,',').ignore()
+	M.delta(⟨2,35⟩,⟨2,38⟩,'V').ignore()
+	M.delta(⟨2,38⟩,⟨2,36⟩,';').ignore()
+	M.delta(⟨2,38⟩,⟨2,33⟩,']').ignore()
+	
+	//goto:x,y;
+	M.delta(⟨18,"BG"⟩,⟨3,3⟩,'g').ignore()
+	M.delta(⟨16,"CM"⟩,⟨3,3⟩,'q').ignore()
+	M.delta(⟨3,3⟩,⟨3,34⟩,':').ignore()
+	//x
+	M.delta(⟨3,34⟩,⟨3,31⟩,'#').ignore()
+	M.delta(⟨3,34⟩,⟨3,38⟩,'V').ignore()
+	//,
+	M.delta(⟨3,38⟩,⟨3,35⟩,',').ignore()
+	M.delta(⟨3,31⟩,⟨3,35⟩,',').ignore()
+	//y
+	M.delta(⟨3,35⟩,⟨3,"NM"⟩,'#').ignore()
+	M.delta(⟨3,35⟩,⟨3,"NM"⟩,'V').ignore()
+	//;
+	M.delta(⟨3,"NM"⟩,⟨3,33⟩,']').ignore()
+	M.delta(⟨3,"NM"⟩,⟨3,36⟩,';').ignore()
+	
+	//move: n;
+	M.delta(⟨18,"BG"⟩,⟨4,4⟩,'l').ignore()
+	M.delta(⟨16,"CM"⟩,⟨4,4⟩,'l').ignore()
+	M.delta(⟨4,4⟩,⟨4,34⟩,':').ignore()
+	M.delta(⟨4,34⟩,⟨4,31⟩,'#').ignore()
+	M.delta(⟨4,34⟩,⟨4,38⟩,'V').ignore()
+	M.delta(⟨4,31⟩,⟨4,36⟩,';').ignore()
+	M.delta(⟨4,38⟩,⟨4,36⟩,';').ignore()
+	M.delta(⟨4,31⟩,⟨4,33⟩,']').ignore()
+	M.delta(⟨4,38⟩,⟨4,33⟩,']').ignore()
+	
+	//turn: D
+	M.delta(⟨18,"BG"⟩,⟨5,5⟩,'t').ignore()
+	M.delta(⟨16,"CM"⟩,⟨5,5⟩,'t').ignore()
+	M.delta(⟨5,5⟩,⟨5,34⟩,':').ignore()
+	M.delta(⟨5,34⟩,⟨5,30⟩,'D').ignore()
+	M.delta(⟨5,30⟩,⟨5,36⟩,';').ignore()
+	M.delta(⟨5,30⟩,⟨5,33⟩,']').ignore()
+	
+	//face: B
+	M.delta(⟨18,"BG"⟩,⟨6,6⟩,'f').ignore()
+	M.delta(⟨16,"CM"⟩,⟨6,6⟩,'f').ignore()
+	M.delta(⟨6,6⟩,⟨6,34⟩,':').ignore()
+	M.delta(⟨6,34⟩,⟨6,29⟩,'B').ignore()
+	M.delta(⟨6,29⟩,⟨6,36⟩,';').ignore()
+	M.delta(⟨6,29⟩,⟨6,33⟩,']').ignore()
+	
+	//put and pick; put: n , X;
+	M.delta(⟨18,"BG"⟩,⟨7,7⟩,'p').ignore()
+	M.delta(⟨16,"CM"⟩,⟨7,7⟩,'p').ignore()
+	M.delta(⟨7,7⟩,⟨7,34⟩,':').ignore()	
+	M.delta(⟨7,34⟩,⟨7,31⟩,'#').ignore()
+	M.delta(⟨7,34⟩,⟨7,38⟩,'V').ignore()	
+	M.delta(⟨7,31⟩,⟨7,35⟩,',').ignore()
+	M.delta(⟨7,38⟩,⟨7,35⟩,',').ignore()
+	M.delta(⟨7,35⟩,⟨7,39⟩,'Y').ignore()
+	M.delta(⟨7,39⟩,⟨7,36⟩,';').ignore()
+	M.delta(⟨7,39⟩,⟨7,33⟩,']').ignore()
+	
+	//move and jump ToThe; command: n,D;
+	M.delta(⟨18,"BG"⟩,⟨9,9⟩,'m').ignore()
+	M.delta(⟨16,"CM"⟩,⟨9,9⟩,'m').ignore()
+	M.delta(⟨9,9⟩,⟨9,34⟩,':').ignore()	
+	M.delta(⟨9,34⟩,⟨9,31⟩,'#').ignore()
+	M.delta(⟨9,34⟩,⟨9,38⟩,'V').ignore()	
+	M.delta(⟨9,31⟩,⟨9,35⟩,',').ignore()
+	M.delta(⟨9,38⟩,⟨9,35⟩,',').ignore()
+	M.delta(⟨9,35⟩,⟨9,30⟩,'D').ignore()
+	M.delta(⟨9,30⟩,⟨9,36⟩,';').ignore()
+	M.delta(⟨9,30⟩,⟨9,33⟩,']').ignore()
+	
+	//move and jump in DIR; command: n,B;
+	M.delta(⟨18,"BG"⟩,⟨10,10⟩,'M').ignore()
+	M.delta(⟨16,"CM"⟩,⟨10,10⟩,'M').ignore()
+	M.delta(⟨10,10⟩,⟨10,34⟩,':').ignore()	
+	M.delta(⟨10,34⟩,⟨10,31⟩,'#').ignore()
+	M.delta(⟨10,34⟩,⟨10,38⟩,'V').ignore()	
+	M.delta(⟨10,31⟩,⟨10,35⟩,',').ignore()
+	M.delta(⟨10,38⟩,⟨10,35⟩,',').ignore()
+	M.delta(⟨10,35⟩,⟨10,29⟩,'B').ignore()
+	M.delta(⟨10,29⟩,⟨10,36⟩,';').ignore()
+	M.delta(⟨10,29⟩,⟨10,33⟩,']').ignore()
+	
+	//nop
+	M.delta(⟨18,"BG"⟩,⟨13,13⟩,'n').ignore()
+	M.delta(⟨16,"CM"⟩,⟨13,13⟩,'n').ignore()
+	M.delta(⟨13,13⟩,⟨13,34⟩,':').ignore()	
+	M.delta(⟨13,34⟩,⟨13,36⟩,';').ignore()
+	M.delta(⟨13,34⟩,⟨13,33⟩,']').ignore()
+	M.delta(⟨13,33⟩,⟨13,33⟩,']').ignore()
+	
+	//Variables
+	
+	M.delta(⟨18,"BG"⟩,⟨14,14⟩,'K').ignore()
+	M.delta(⟨16,"CM"⟩,⟨14,14⟩,'K').ignore()
+	M.delta(⟨14,14⟩,⟨14,38⟩,'V').ignore()
+	M.delta(⟨14,38⟩,⟨14,35⟩,',').ignore()
+	M.delta(⟨14,35⟩,⟨14,38⟩,'V').ignore()
+	M.delta(⟨14,38⟩,⟨14,36⟩,';').ignore()
+	
+	//PROCESS
+	M.delta(⟨18,"BG"⟩,⟨16,16⟩,'P').ignore()
+	M.delta(⟨16,"CM"⟩,⟨16,16⟩,'P').ignore()
+	M.delta(⟨16,16⟩,⟨16,38⟩,'V').ignore()
+	M.delta(18,⟨16,38⟩,'V').ignore()
+	M.delta(⟨16,38⟩,⟨16,32⟩,'[').ignore()
+	M.delta(⟨16,32⟩,⟨16,37⟩,'|').ignore()	
+	//Variables internas | a,b,c|
+	M.delta(⟨16,37⟩,⟨16,"NM"⟩,'V').ignore()
+	M.delta(⟨16,"NM"⟩,⟨16,35⟩,',').ignore()
+	M.delta(⟨16,35⟩,⟨16,"NM"⟩,'V').ignore()
+	M.delta(⟨16,"NM"⟩,⟨16,37⟩,'|').ignore()
+	M.delta(⟨16,37⟩,⟨16,37⟩,'|').ignore()
+	M.delta(⟨16,37⟩,⟨16,"CM"⟩,"").ignore()
+	
+	//estructuras de control
+	
+	//condicional
+	
+	M.delta(⟨18,"BG"⟩,⟨17,17⟩,'I').ignore()
+	M.delta(⟨16,"CM"⟩,⟨17,17⟩,'I').ignore()
+	M.delta(⟨17,17⟩,⟨17,34⟩,':').ignore()
+	//condiciones
+	M.delta(⟨17,34⟩,⟨17,23⟩,'C').ignore()	
+	M.delta(⟨17,34⟩,⟨17,24⟩,'q').ignore()	
+	M.delta(⟨17,34⟩,⟨17,25⟩,'Q').ignore()	
+	M.delta(⟨17,34⟩,⟨17,26⟩,'z').ignore()	
+	M.delta(⟨17,34⟩,⟨17,27⟩,'c').ignore()
+	//facing:B
+	M.delta(⟨17,27⟩,⟨27,34⟩,':').ignore()
+	M.delta(⟨27,34⟩,⟨27,29⟩,'B').ignore()	
+	//canput&pick
+	M.delta(⟨17,23⟩,⟨23,34⟩,':').ignore()
+	M.delta(⟨23,34⟩,⟨23,31⟩,'#').ignore()
+	M.delta(⟨23,34⟩,⟨23,38⟩,'V').ignore()
+	M.delta(⟨23,31⟩,⟨23,35⟩,',').ignore()
+	M.delta(⟨23,38⟩,⟨23,35⟩,',').ignore()
+	M.delta(⟨23,35⟩,⟨23,39⟩,'Y').ignore()
+	//canMove&JumpInDir
+	M.delta(⟨17,24⟩,⟨24,34⟩,':').ignore()
+	M.delta(⟨24,34⟩,⟨24,31⟩,'#').ignore()
+	M.delta(⟨24,34⟩,⟨24,38⟩,'V').ignore()
+	M.delta(⟨24,31⟩,⟨24,35⟩,',').ignore()
+	M.delta(⟨24,38⟩,⟨24,35⟩,',').ignore()
+	M.delta(⟨24,35⟩,⟨24,29⟩,'B').ignore()
+	//canMove&JumpToThe
+	M.delta(⟨17,25⟩,⟨25,34⟩,':').ignore()
+	M.delta(⟨25,34⟩,⟨25,31⟩,'#').ignore()
+	M.delta(⟨25,34⟩,⟨25,38⟩,'V').ignore()
+	M.delta(⟨25,31⟩,⟨25,35⟩,',').ignore()
+	M.delta(⟨25,38⟩,⟨25,35⟩,',').ignore()
+	M.delta(⟨25,35⟩,⟨25,30⟩,'D').ignore()
+	//not
+	M.delta(⟨17,26⟩,⟨26,34⟩,':').ignore()
+	M.delta(⟨26,34⟩,⟨17,23⟩,'C').ignore()	
+	M.delta(⟨26,34⟩,⟨17,24⟩,'q').ignore()	
+	M.delta(⟨26,34⟩,⟨17,25⟩,'Q').ignore()	
+	M.delta(⟨26,34⟩,⟨17,26⟩,'z').ignore()	
+	M.delta(⟨26,34⟩,⟨17,27⟩,'c').ignore()
+	
+	//regret
+	M.delta(⟨27,29⟩,⟨18,18⟩,'T').ignore()
+	M.delta(⟨23,39⟩,⟨18,18⟩,'T').ignore()
+	M.delta(⟨24,29⟩,⟨18,18⟩,'T').ignore()
+	M.delta(⟨25,30⟩,⟨18,18⟩,'T').ignore()
+	
+	M.delta(⟨18,18⟩,⟨18,34⟩,':').ignore()	
+	M.delta(⟨18,34⟩,⟨18,32⟩,'[').ignore()
+	M.delta(18,⟨19,19⟩,'G').ignore()
+	M.delta(⟨19,19⟩,⟨19,34⟩,':').ignore()	
+	M.delta(⟨19,34⟩,⟨19,32⟩,'[').ignore()
+	
+	
+	//loop
+	M.delta(⟨18,"BG"⟩,⟨20,20⟩,'w').ignore()
+	M.delta(⟨16,"CM"⟩,⟨20,20⟩,'w').ignore()
+	M.delta(⟨20,20⟩,⟨20,34⟩,':').ignore()
+	//condiciones
+	M.delta(⟨20,34⟩,⟨17,23⟩,'C').ignore()	
+	M.delta(⟨20,34⟩,⟨17,24⟩,'q').ignore()	
+	M.delta(⟨20,34⟩,⟨17,25⟩,'Q').ignore()	
+	M.delta(⟨20,34⟩,⟨17,26⟩,'z').ignore()	
+	M.delta(⟨20,34⟩,⟨17,27⟩,'c').ignore()
+	//regret
+	M.delta(⟨27,29⟩,⟨21,21⟩,'d').ignore()
+	M.delta(⟨23,39⟩,⟨21,21⟩,'d').ignore()
+	M.delta(⟨24,29⟩,⟨21,21⟩,'d').ignore()
+	M.delta(⟨25,30⟩,⟨21,21⟩,'d').ignore()
+	M.delta(⟨26,34⟩,⟨21,21⟩,'d').ignore()
+	M.delta(⟨21,21⟩,⟨21,34⟩,':').ignore()
+	M.delta(⟨21,34⟩,⟨21,32⟩,'[').ignore()
+	
+	//repeat
+	M.delta(⟨18,"BG"⟩,⟨22,22⟩,'r').ignore()
+	M.delta(⟨16,"CM"⟩,⟨22,22⟩,'r').ignore()
+	M.delta(⟨22,22⟩,⟨22,34⟩,':').ignore()
+	M.delta(⟨22,34⟩,⟨22,31⟩,'#').ignore()	
+	M.delta(⟨22,34⟩,⟨22,37⟩,'V').ignore()	
+	M.delta(⟨22,31⟩,⟨22,32⟩,'[').ignore()	
+	M.delta(⟨22,37⟩,⟨22,32⟩,'[').ignore()	
+	
+	//bloques
+	M.delta(⟨18,"BG"⟩,⟨32,32⟩,'[').ignore()
+	M.delta(⟨16,"CM"⟩,⟨32,32⟩,'[').ignore()
+	M.delta(18,⟨32,32⟩,'[').ignore()
+	
+	//llamado de procs
+	M.delta(⟨18,"BG"⟩,⟨38,38⟩,'V').ignore()
+	M.delta(⟨16,"CM"⟩,⟨38,38⟩,'V').ignore()
+	M.delta(⟨38,38⟩,⟨38,34⟩,':').ignore()
+	M.delta(⟨38,34⟩,⟨38,31⟩,'#').ignore()
+	M.delta(⟨38,31⟩,⟨38,35⟩,',').ignore()
+	M.delta(⟨38,35⟩,⟨38,31⟩,'#').ignore()
+	M.delta(⟨38,31⟩,⟨38,36⟩,';').ignore()
+	M.delta(⟨38,34⟩,⟨38,33⟩,']').ignore()
+	M.delta(⟨38,34⟩,⟨38,36⟩,';').ignore()
+	M.delta(⟨38,31⟩,⟨38,33⟩,']').ignore()
+	
+	//Iteracion ] ;
+	M.delta(⟨2,33⟩,18,"").ignore()
+	M.delta(⟨3,33⟩,18,"").ignore()
+	M.delta(⟨4,33⟩,18,"").ignore()
+	M.delta(⟨5,33⟩,18,"").ignore()
+	M.delta(⟨6,33⟩,18,"").ignore()
+	M.delta(⟨7,33⟩,18,"").ignore()
+	M.delta(⟨9,33⟩,18,"").ignore()
+	M.delta(⟨10,33⟩,18,"").ignore()
+	M.delta(⟨14,33⟩,18,"").ignore()
+	M.delta(⟨13,33⟩,18,"").ignore()
+	M.delta(⟨38,33⟩,18,"").ignore()
+	M.delta(18,18,']').ignore()
+	
+	
+	//Iteracion entre comandos
+	M.delta(⟨2,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨3,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨4,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨5,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨6,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨7,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨9,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨10,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨14,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨13,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨38,36⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨13,32⟩,⟨18,"BG"⟩,"").ignore()	
+	M.delta(⟨22,32⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨18,32⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨19,32⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨21,32⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(⟨32,32⟩,⟨18,"BG"⟩,"").ignore()
+	M.delta(18,⟨18,"BG"⟩,';').ignore()
+	
+	//Iteracion entre condition
+	M.delta(⟨18,34⟩,⟨18,"CT"⟩,"").ignore()
+	M.delta(⟨19,34⟩,⟨18,"BG"⟩,"").ignore()
+	
+	
+	
+	
+ // this will only  be used when testing only the parser as the lexer removes  SkipChars
+ 
+ for each q in Q do
+ 	for each s in SkipChars do
+ 	   M.delta(q,q,λ+s).ignore()
+ end
+ end
+
+
+return M
+end
